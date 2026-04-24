@@ -1,0 +1,511 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   LACHY OS — Design System
+   Aesthetic: Dark Luxury / Portal UI
+   Anchor: Colored top-line glow per agent
+   ============================================ */
+
+:root {
+  --bg-base: #05050a;
+  --bg-surface: #0d0d16;
+  --bg-card: rgba(255, 255, 255, 0.025);
+  --border-default: rgba(255, 255, 255, 0.06);
+  --text-primary: #eeeef5;
+  --text-secondary: #5a5a78;
+  --text-muted: #2e2e45;
+  --font-display: var(--font-space-grotesk), sans-serif;
+  --font-body: var(--font-outfit), sans-serif;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100dvh;
+  background: var(--bg-base);
+
+  /* Subtle ambient light — gives depth to the dark bg */
+  background-image:
+    radial-gradient(ellipse 60% 40% at 15% 0%, rgba(99, 102, 241, 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 30% at 85% 100%, rgba(16, 185, 129, 0.03) 0%, transparent 70%);
+
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================
+   PASSWORD GATE
+   ============================================ */
+
+.password-screen {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.password-card {
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.password-eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+}
+
+.password-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 2rem;
+  letter-spacing: -0.03em;
+}
+
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.password-input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.3em;
+  color: var(--text-primary);
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.password-input:focus {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.password-input-error {
+  border-color: #EF4444 !important;
+}
+
+.password-error {
+  font-size: 0.75rem;
+  color: #EF4444;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+.password-submit {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 0.9rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.password-submit:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.password-submit:active {
+  transform: scale(0.97);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+.shake {
+  animation: shake 0.4s ease;
+}
+
+/* ============================================
+   HOME SCREEN
+   ============================================ */
+
+.home-screen {
+  min-height: 100dvh;
+  padding: 3.5rem 1.25rem 3rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.home-header {
+  margin-bottom: 2rem;
+}
+
+.home-eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin: 0 0 0.4rem;
+}
+
+.home-title {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.home-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================
+   AGENT GRID
+   ============================================ */
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+/* ============================================
+   AGENT CARD
+   — Memorable anchor: colored top line +
+     ambient glow radiating from card top
+   ============================================ */
+
+.agent-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 18px;
+  padding: 1.1rem 1rem 1rem;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+  text-align: left;
+  overflow: hidden;
+  width: 100%;
+  min-height: 158px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Colored top-line accent — the signature element */
+.agent-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--agent-color);
+  opacity: 0.85;
+}
+
+/* Ambient glow bleeding from the top accent */
+.agent-card::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 5%;
+  right: 5%;
+  height: 28px;
+  background: var(--agent-color);
+  filter: blur(14px);
+  opacity: 0.13;
+  pointer-events: none;
+}
+
+/* Tap feedback — mobile-first */
+.agent-card:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+/* Hover (desktop bonus) */
+@media (hover: hover) {
+  .agent-card:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--agent-color) 28%, transparent);
+    box-shadow:
+      0 0 40px color-mix(in srgb, var(--agent-color) 10%, transparent),
+      0 4px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+  }
+}
+
+.agent-card:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.agent-icon {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--agent-color);
+  display: block;
+  line-height: 1;
+  margin-bottom: auto;
+}
+
+.agent-info {
+  margin-top: 0.65rem;
+}
+
+.agent-name {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.2rem;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.agent-desc {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.agent-badge {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.agent-arrow {
+  position: absolute;
+  bottom: 0.9rem;
+  right: 0.9rem;
+  color: var(--agent-color);
+  opacity: 0.5;
+  font-size: 0.85rem;
+  font-family: var(--font-display);
+}
+
+/* ============================================
+   VOICE SESSION SCREEN
+   ============================================ */
+
+.voice-session-screen {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  position: relative;
+
+  /* Radial glow from center using agent color */
+  background-image: radial-gradient(
+    ellipse 60% 40% at 50% 55%,
+    color-mix(in srgb, var(--agent-color) 4%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+.back-button {
+  position: absolute;
+  top: 2rem;
+  left: 1.5rem;
+  background: none;
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.back-button:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+}
+
+.session-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.session-icon {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  color: var(--agent-color);
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.session-name {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.3rem;
+  letter-spacing: -0.025em;
+}
+
+.session-tagline {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ============================================
+   MIC BUTTON
+   ============================================ */
+
+.mic-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+/* Pulse rings when speaking */
+.pulse-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--agent-color) 15%, transparent);
+  animation: pulse-out 1.6s ease-out infinite;
+}
+
+.pulse-ring-2 {
+  animation-delay: 0.5s;
+}
+
+@keyframes pulse-out {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* Breathe ring when listening */
+.breathe-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--agent-color) 35%, transparent);
+  animation: breathe 2.5s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.3;
+  }
+}
+
+.mic-button {
+  position: relative;
+  z-index: 1;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mic-button.mic-active {
+  border-color: color-mix(in srgb, var(--agent-color) 50%, transparent);
+  background: color-mix(in srgb, var(--agent-color) 6%, var(--bg-surface));
+  color: var(--agent-color);
+  box-shadow: 0 0 32px color-mix(in srgb, var(--agent-color) 18%, transparent);
+}
+
+.mic-button:active:not(:disabled) {
+  transform: scale(0.93);
+}
+
+.mic-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.session-status {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  height: 1.2em;
+}
