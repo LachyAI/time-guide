@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { CosmicBackground } from "@/components/CosmicBackground";
 import { useVoiceSession } from "@/components/VoiceSession";
 import type { Agent } from "@/lib/agents";
 
@@ -8,11 +10,48 @@ interface VoiceSessionScreenProps {
   onBack: () => void;
 }
 
+function formatElapsed(ms: number): string {
+  const s = Math.floor(ms / 1000);
+  return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+}
+
 export function VoiceSessionScreen({ agent, onBack }: VoiceSessionScreenProps) {
-  const { status, isSpeaking, start, stop } = useVoiceSession(agent.id);
+  const { status, isSpeaking, messages, startedAt, getInputLevel, start, stop } =
+    useVoiceSession(agent.id);
 
   const isConnected = status === "connected";
   const isConnecting = status === "connecting" || status === "disconnecting";
+
+  // --- session timer ---
+  const [elapsed, setElapsed] = useState("00:00");
+  useEffect(() => {
+    if (!startedAt) return;
+    const t = setInterval(() => setElapsed(formatElapsed(Date.now() - startedAt)), 1000);
+    return () => clearInterval(t);
+  }, [startedAt]);
+
+  // --- live input-level ring (rAF drives a CSS var; no re-renders) ---
+  const micContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isConnected) {
+      micContainerRef.current?.style.setProperty("--input-level", "0");
+      return;
+    }
+    let raf: number;
+    const tick = () => {
+      const level = isSpeaking ? 0 : getInputLevel();
+      micContainerRef.current?.style.setProperty("--input-level", level.toFixed(3));
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [isConnected, isSpeaking, getInputLevel]);
+
+  // --- captions autoscroll ---
+  const captionsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    captionsRef.current?.scrollTo({ top: captionsRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages]);
 
   const handleBack = async () => {
     if (isConnected) await stop();
@@ -29,9 +68,16 @@ export function VoiceSessionScreen({ agent, onBack }: VoiceSessionScreenProps) {
       className="voice-session-screen"
       style={{ "--agent-color": agent.color } as React.CSSProperties}
     >
+      <CosmicBackground />
       <button onClick={handleBack} className="back-button">
         ← back
       </button>
+
+      {(isConnected || startedAt) && (
+        <span className="session-timer" aria-label="Session length">
+          {elapsed}
+        </span>
+      )}
 
       <div className="session-header">
         <span className="session-icon">{agent.icon}</span>
@@ -39,9 +85,10 @@ export function VoiceSessionScreen({ agent, onBack }: VoiceSessionScreenProps) {
         <p className="session-tagline">{agent.description}</p>
       </div>
 
-      <div className="mic-container">
+      <div className="mic-container" ref={micContainerRef}>
         {isSpeaking && <div className="pulse-ring" />}
         {isSpeaking && <div className="pulse-ring pulse-ring-2" />}
+        {isConnected && !isSpeaking && <div className="level-ring" />}
         {isConnected && !isSpeaking && <div className="breathe-ring" />}
 
         <button
@@ -73,8 +120,19 @@ export function VoiceSessionScreen({ agent, onBack }: VoiceSessionScreenProps) {
         {isConnecting && "connecting..."}
         {isConnected && isSpeaking && "speaking"}
         {isConnected && !isSpeaking && "listening"}
-        {!isConnected && !isConnecting && "tap to begin"}
+        {!isConnected && !isConnecting && (messages.length ? "session ended" : "tap to begin")}
       </p>
+
+      {messages.length > 0 && (
+        <div className="captions" ref={captionsRef} aria-live="polite">
+          {messages.map((m) => (
+            <p key={m.id} className={`caption-line caption-${m.role}`}>
+              <span className="caption-who">{m.role === "user" ? "you" : agent.name.toLowerCase()}</span>
+              {m.text}
+            </p>
+          ))}
+        </div>
+      )}
     </main>
   );
 }

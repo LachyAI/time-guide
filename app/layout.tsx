@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Outfit } from "next/font/google";
+import { CursorPulse } from "@/components/CursorPulse";
 import { PasswordGate } from "@/components/PasswordGate";
 import "./globals.css";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${spaceGrotesk.variable} ${outfit.variable}`}>
+        <CursorPulse />
         <PasswordGate>{children}</PasswordGate>
       </body>
     </html>

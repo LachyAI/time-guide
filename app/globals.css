@@ -46,6 +46,317 @@ body {
 }
 
 /* ============================================
+   COSMIC BACKGROUND — floating stars, orbs, orbit
+   Pure CSS · fixed · behind everything
+   ============================================ */
+
+.cosmic {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* -- nebula haze: big drifting color clouds, slow hue breathing -- */
+.cosmic-nebula {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.cosmic-nebula-1 {
+  width: 75vmax;
+  height: 55vmax;
+  top: -18%;
+  left: -15%;
+  background: radial-gradient(
+    ellipse at 40% 45%,
+    color-mix(in srgb, var(--agent-color, #6366f1) 20%, transparent) 0%,
+    rgba(99, 102, 241, 0.1) 40%,
+    rgba(168, 85, 247, 0.06) 60%,
+    transparent 75%
+  );
+  animation: nebula-drift-1 38s ease-in-out infinite, nebula-hue 26s ease-in-out infinite;
+}
+
+.cosmic-nebula-2 {
+  width: 60vmax;
+  height: 48vmax;
+  bottom: -22%;
+  right: -18%;
+  background: radial-gradient(
+    ellipse at 55% 50%,
+    rgba(16, 185, 129, 0.14) 0%,
+    rgba(6, 182, 212, 0.09) 45%,
+    transparent 72%
+  );
+  animation: nebula-drift-2 46s ease-in-out infinite, nebula-hue 34s ease-in-out infinite reverse;
+}
+
+@keyframes nebula-drift-1 {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(9vw, 6vh, 0) rotate(14deg) scale(1.18); }
+}
+
+@keyframes nebula-drift-2 {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(-10vw, -7vh, 0) rotate(-16deg) scale(1.22); }
+}
+
+@keyframes nebula-hue {
+  0%, 100% { filter: blur(70px) hue-rotate(0deg); }
+  50% { filter: blur(70px) hue-rotate(40deg); }
+}
+
+/* -- shooting stars: streaks crossing every few seconds -- */
+.cosmic-shooting {
+  position: absolute;
+  width: 140px;
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.85), transparent);
+  border-radius: 2px;
+  opacity: 0;
+  transform: rotate(-32deg);
+  will-change: transform, opacity;
+}
+
+.cosmic-shooting-1 {
+  top: 14%;
+  left: 68%;
+  animation: shoot 9s linear infinite;
+  animation-delay: 2s;
+}
+
+.cosmic-shooting-2 {
+  top: 42%;
+  left: 88%;
+  width: 100px;
+  animation: shoot 13s linear infinite;
+  animation-delay: 7s;
+}
+
+.cosmic-shooting-3 {
+  top: 6%;
+  left: 34%;
+  width: 180px;
+  animation: shoot 17s linear infinite;
+  animation-delay: 11.5s;
+}
+
+@keyframes shoot {
+  0% { opacity: 0; transform: rotate(-32deg) translateX(0); }
+  1.5% { opacity: 1; }
+  8% { opacity: 0; transform: rotate(-32deg) translateX(-52vmax); }
+  100% { opacity: 0; transform: rotate(-32deg) translateX(-52vmax); }
+}
+
+/* -- starfield: two parallax layers of tiny dots -- */
+.cosmic-stars {
+  position: absolute;
+  inset: -50%;
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 22%, rgba(255, 255, 255, 0.9) 50%, transparent 51%),
+    radial-gradient(1.3px 1.3px at 38% 68%, rgba(255, 255, 255, 0.7) 50%, transparent 51%),
+    radial-gradient(1.8px 1.8px at 61% 15%, rgba(255, 255, 255, 0.8) 50%, transparent 51%),
+    radial-gradient(1.3px 1.3px at 79% 47%, rgba(255, 255, 255, 0.6) 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 27% 88%, rgba(255, 255, 255, 0.65) 50%, transparent 51%),
+    radial-gradient(1.7px 1.7px at 88% 81%, rgba(255, 255, 255, 0.75) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 51% 39%, rgba(255, 255, 255, 0.55) 50%, transparent 51%);
+  background-size: 520px 520px;
+  animation:
+    cosmic-drift 70s linear infinite,
+    cosmic-twinkle 5s ease-in-out infinite;
+}
+
+.cosmic-stars-far {
+  background-size: 310px 310px;
+  opacity: 0.65;
+  animation-duration: 130s, 8s;
+  animation-delay: 0s, 3s;
+}
+
+@keyframes cosmic-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-260px, -180px, 0); }
+}
+
+@keyframes cosmic-twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+/* -- drifting orbs ("planets") — blurred, agent-tinted -- */
+.cosmic-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(46px);
+  will-change: transform;
+}
+
+.cosmic-orb-1 {
+  width: 300px;
+  height: 300px;
+  top: -8%;
+  right: -12%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    color-mix(in srgb, var(--agent-color, #6366f1) 34%, transparent) 0%,
+    color-mix(in srgb, var(--agent-color, #6366f1) 12%, transparent) 55%,
+    transparent 72%
+  );
+  animation: orb-float-1 24s ease-in-out infinite;
+}
+
+.cosmic-orb-2 {
+  width: 220px;
+  height: 220px;
+  bottom: -6%;
+  left: -10%;
+  background: radial-gradient(
+    circle at 60% 40%,
+    rgba(16, 185, 129, 0.26) 0%,
+    rgba(16, 185, 129, 0.09) 55%,
+    transparent 72%
+  );
+  animation: orb-float-2 30s ease-in-out infinite;
+}
+
+.cosmic-orb-3 {
+  width: 130px;
+  height: 130px;
+  top: 42%;
+  left: 68%;
+  background: radial-gradient(
+    circle at 40% 40%,
+    color-mix(in srgb, var(--agent-color, #f59e0b) 28%, transparent) 0%,
+    transparent 70%
+  );
+  filter: blur(30px);
+  animation: orb-float-3 18s ease-in-out infinite;
+}
+
+@keyframes orb-float-1 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(-110px, 80px, 0) scale(1.18); }
+  66% { transform: translate3d(50px, 150px, 0) scale(0.9); }
+}
+
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  40% { transform: translate3d(130px, -100px, 0) scale(1.22); }
+  75% { transform: translate3d(40px, -180px, 0) scale(0.88); }
+}
+
+@keyframes orb-float-3 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-160px, -90px, 0) scale(1.4); }
+}
+
+/* -- slow orbit ring — a faint elliptical line, barely there -- */
+.cosmic-ring {
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  top: 50%;
+  left: 50%;
+  margin: -280px 0 0 -280px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transform: rotateX(68deg);
+  animation: ring-spin 36s linear infinite;
+}
+
+@keyframes ring-spin {
+  from { transform: rotateX(68deg) rotateZ(0deg); }
+  to { transform: rotateX(68deg) rotateZ(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cosmic-stars,
+  .cosmic-orb,
+  .cosmic-ring,
+  .cosmic-nebula,
+  .cosmic-shooting {
+    animation: none;
+  }
+  .cosmic-shooting {
+    display: none;
+  }
+}
+
+/* ============================================
+   CURSOR PULSE — heartbeat rings around pointer
+   Desktop only · pointer-events none
+   ============================================ */
+
+.cursor-pulse {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.cursor-core {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.cursor-ring {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  border: 1.2px solid color-mix(in srgb, var(--agent-color, #6366f1) 70%, white);
+  opacity: 0;
+  animation: cursor-heartbeat 1.8s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+
+.cursor-ring-2 {
+  animation-delay: 0.22s;
+}
+
+.cursor-ring-3 {
+  animation-delay: 0.44s;
+}
+
+@keyframes cursor-heartbeat {
+  0% {
+    transform: scale(0.18);
+    opacity: 0.85;
+  }
+  55% {
+    opacity: 0.28;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+/* hide on touch devices + reduced motion */
+@media (pointer: coarse) {
+  .cursor-pulse {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-pulse {
+    display: none;
+  }
+}
+
+/* ============================================
    PASSWORD GATE
    ============================================ */
 
@@ -443,6 +754,21 @@ body {
   }
 }
 
+/* Live input-level ring — scales + brightens with YOUR voice volume.
+   Driven by --input-level (0..1) set from a rAF loop, no re-renders. */
+.level-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--agent-color);
+  opacity: calc(0.12 + var(--input-level, 0) * 0.75);
+  transform: scale(calc(1 + var(--input-level, 0) * 0.28));
+  box-shadow: 0 0 calc(6px + var(--input-level, 0) * 30px)
+    color-mix(in srgb, var(--agent-color) 45%, transparent);
+  transition: opacity 0.08s linear, transform 0.08s linear;
+  pointer-events: none;
+}
+
 /* Breathe ring when listening */
 .breathe-ring {
   position: absolute;
@@ -508,4 +834,96 @@ body {
   letter-spacing: 0.12em;
   text-transform: lowercase;
   height: 1.2em;
+}
+
+/* ============================================
+   SESSION TIMER
+   ============================================ */
+
+.session-timer {
+  position: absolute;
+  top: 2rem;
+  right: 1.5rem;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+}
+
+/* ============================================
+   LIVE CAPTIONS
+   ============================================ */
+
+.captions {
+  width: 100%;
+  max-width: 440px;
+  max-height: 26dvh;
+  overflow-y: auto;
+  margin-top: 1.75rem;
+  padding: 0.25rem 0.5rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+  /* soft fade at the top so old lines dissolve */
+  mask-image: linear-gradient(to bottom, transparent 0%, black 14%);
+}
+
+.caption-line {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  animation: caption-in 0.25s ease;
+}
+
+.caption-line.caption-agent {
+  color: var(--text-primary);
+  opacity: 0.85;
+}
+
+.caption-who {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+  color: var(--text-muted);
+}
+
+.caption-line.caption-agent .caption-who {
+  color: color-mix(in srgb, var(--agent-color) 75%, transparent);
+}
+
+@keyframes caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   HOME BRAND MARK
+   ============================================ */
+
+.home-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.home-brand svg {
+  display: block;
 }
