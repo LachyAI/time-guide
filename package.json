@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "node --test \"test/**/*.test.ts\" \"test/**/*.test.mjs\""
   },
   "dependencies": {
     "@11labs/react": "0.1.4",
