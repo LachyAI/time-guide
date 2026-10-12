@@ -1,21 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AgentCard } from "@/components/AgentCard";
 import { CosmicBackground } from "@/components/CosmicBackground";
+import { LiveSessionScreen } from "@/components/LiveSessionScreen";
 import { VoiceSessionScreen } from "@/components/VoiceSessionScreen";
 import { agents, type Agent } from "@/lib/agents";
+import { fetchAgents, type AgentConfig } from "@/lib/voiceBrain";
 
 export default function Home() {
   const [activeAgent, setActiveAgent] = useState<Agent | null>(null);
+  const [configs, setConfigs] = useState<Record<string, AgentConfig> | null>(null);
+
+  // Which engine each agent runs on comes from voice-brain; if that call fails every agent stays on ElevenLabs.
+  useEffect(() => {
+    fetchAgents().then(setConfigs).catch(() => setConfigs({}));
+  }, []);
 
   if (activeAgent) {
-    return (
-      <VoiceSessionScreen
-        agent={activeAgent}
-        onBack={() => setActiveAgent(null)}
-      />
-    );
+    const config = configs?.[activeAgent.slug];
+    if (config?.engine === "live") {
+      return (
+        <LiveSessionScreen
+          agent={activeAgent}
+          config={config}
+          onBack={() => setActiveAgent(null)}
+          onConfigChange={(c) => setConfigs((all) => ({ ...(all ?? {}), [activeAgent.slug]: c }))}
+        />
+      );
+    }
+    return <VoiceSessionScreen agent={activeAgent} onBack={() => setActiveAgent(null)} />;
   }
 
   return (
@@ -38,7 +52,7 @@ export default function Home() {
 
       <div className="agent-grid">
         {agents.map((agent) => (
-          <AgentCard key={agent.slug} agent={agent} onSelect={setActiveAgent} />
+          <AgentCard key={agent.slug} agent={agent} onSelect={configs ? setActiveAgent : () => {}} />
         ))}
       </div>
     </main>
