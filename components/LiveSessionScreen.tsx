@@ -1,6 +1,7 @@
 "use client";
 
 import { SessionView } from "@/components/SessionView";
+import { VoicePicker } from "@/components/VoicePicker";
 import { useLiveSession } from "@/lib/live/useLiveSession";
 import type { Agent } from "@/lib/agents";
 import type { AgentConfig } from "@/lib/voiceBrain";
@@ -25,7 +26,10 @@ export function LiveSessionScreen({ agent, config, onBack, onConfigChange }: Liv
       session={session}
       onBack={onBack}
       below={
-        <div className="live-controls" data-config-voice={config.voice ?? ""} data-live={live ? "1" : "0"}>
+        <div className="live-controls">
+          {!live && (
+            <VoicePicker slug={agent.slug} current={config.voice} onChange={(voice) => onConfigChange({ ...config, voice })} />
+          )}
           {live && session.isSpeaking && !session.bargeIn && (
             <button className="voice-chip" onClick={session.interrupt}>tap to cut in</button>
           )}

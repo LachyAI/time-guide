@@ -1,21 +1,14 @@
 {
-  "name": "Time Guide",
-  "short_name": "Time Guide",
-  "description": "Your intelligent time travel companion",
+  "name": "Lachy OS Voice",
+  "short_name": "Voice",
+  "description": "Voice agents",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#05050a",
+  "theme_color": "#05050a",
   "icons": [
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
