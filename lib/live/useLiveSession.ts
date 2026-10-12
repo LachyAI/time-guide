@@ -4,11 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ConversationStatus, SessionMessage } from "@/components/VoiceSession";
 import { liveUrl, lock } from "@/lib/voiceBrain";
 import { createPlayer, type Player } from "@/lib/live/player";
+import { MAX_RETRIES, retryDelay } from "@/lib/live/reconnect";
 
 export type Latency = { turn: number; total: number; detect: number; server: number | null; net: number | null };
 
-// 0.5s doubling to a 15s cap: about a minute of retries, inside the server's 2-minute reconnect window.
-const MAX_RETRIES = 8;
+// No "ready" this long after connecting means the listening service never came up.
+const READY_TIMEOUT_MS = 15_000;
 
 export function useLiveSession(slug: string) {
   const [status, setStatus] = useState<ConversationStatus>("disconnected");
@@ -40,6 +41,10 @@ export function useLiveSession(slug: string) {
   const dropping = useRef(false);
   const heard = useRef(new Map<number, { total: number; detect: number }>());
   const bargeInRef = useRef(true);
+  const readyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const everReady = useRef(false);
+  const lastError = useRef<string | null>(null);
+  const micLost = useRef<() => void>(() => {});
 
   const addMessage = (role: SessionMessage["role"], text: string) =>
     setMessages((m) => [...m, { role, text, id: nextId.current++ }]);
@@ -67,6 +72,7 @@ export function useLiveSession(slug: string) {
 
   const teardown = useCallback(() => {
     if (retryTimer.current) clearTimeout(retryTimer.current);
+    if (readyTimer.current) clearTimeout(readyTimer.current);
     stream.current?.getTracks().forEach((t) => t.stop());
     stream.current = null;
     player.current?.stop();
@@ -94,6 +100,11 @@ export function useLiveSession(slug: string) {
       case "ready":
       case "reconnected":
         retries.current = 0;
+        everReady.current = true;
+        if (readyTimer.current) clearTimeout(readyTimer.current);
+        // A reply cut off by the drop is over; don't stay on "speaking" until the next one.
+        replyActive.current = false;
+        dropping.current = false;
         setStatus("connected");
         setStartedAt((s) => s ?? Date.now());
         setStateLine(null);
@@ -139,6 +150,7 @@ export function useLiveSession(slug: string) {
         recordLatency(m.turn, m.firstAudioSent ?? null);
         break;
       case "error":
+        lastError.current = m.message;
         setStateLine(m.message === "voice failed" ? "voice failed, the reply is on screen" : m.message);
         break;
       case "ended":
@@ -155,6 +167,16 @@ export function useLiveSession(slug: string) {
     sock.binaryType = "arraybuffer";
     ws.current = sock;
     sock.onmessage = onMessage;
+    if (readyTimer.current) clearTimeout(readyTimer.current);
+    readyTimer.current = setTimeout(() => {
+      if (ws.current !== sock || !wantOpen.current) return;
+      if (everReady.current) { sock.close(); return; } // a reconnect attempt that hangs: let the retry path take over
+      ws.current = null;
+      wantOpen.current = false;
+      sock.close();
+      teardown(); setStatus("disconnected");
+      setStateLine("couldn't reach the listening service");
+    }, READY_TIMEOUT_MS);
     sock.onclose = (ev) => {
       if (ws.current !== sock) return;
       ws.current = null;
@@ -165,16 +187,18 @@ export function useLiveSession(slug: string) {
       }
       if (ev.code === 1011) {
         wantOpen.current = false; teardown(); setStatus("disconnected");
-        setStateLine(ev.reason || "voice service error");
+        setStateLine(lastError.current || ev.reason || "voice service error"); // the server's error message says why
         return;
       }
       if (wantOpen.current && retries.current < MAX_RETRIES) {
-        const wait = Math.min(15000, 500 * 2 ** retries.current++);
+        const wait = retryDelay(retries.current++);
         setStateLine("reconnecting");
         retryTimer.current = setTimeout(() => { if (wantOpen.current) connect(); }, wait);
         return;
       }
+      const gaveUp = wantOpen.current;
       wantOpen.current = false; teardown(); setStatus("disconnected");
+      if (gaveUp) setStateLine("connection lost");
     };
   }, [slug, onMessage, teardown]);
 
@@ -182,6 +206,8 @@ export function useLiveSession(slug: string) {
     if (wantOpen.current) return;
     wantOpen.current = true;
     retries.current = 0;
+    everReady.current = false;
+    lastError.current = null;
     heard.current.clear();
     setMessages([]); setInterim(""); setLatency([]); setStartedAt(null);
     setStatus("connecting"); setStateLine(null);
@@ -192,6 +218,7 @@ export function useLiveSession(slug: string) {
       await ac.resume();
       const mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
       stream.current = mic;
+      mic.getAudioTracks()[0]?.addEventListener("ended", () => micLost.current());
       await ac.audioWorklet.addModule("/audio/mic-worklet.js");
       const node = new AudioWorkletNode(ac, "mic");
       const mute = ac.createGain();
@@ -228,6 +255,10 @@ export function useLiveSession(slug: string) {
     setStateLine(null);
   }, [teardown]);
 
+  useEffect(() => {
+    micLost.current = () => { void stop(); setStateLine("microphone lost, tap to start again"); };
+  }, [stop]);
+
   // She counts as speaking from reply_start until her audio has drained.
   useEffect(() => {
     if (status !== "connected") return;
@@ -239,6 +270,8 @@ export function useLiveSession(slug: string) {
   useEffect(() => {
     const onVisible = () => {
       if (document.visibilityState !== "visible" || !wantOpen.current) return;
+      // iOS can end the mic of a backgrounded app; the socket is fine but she would hear nothing.
+      if (stream.current?.getAudioTracks()[0]?.readyState === "ended") { micLost.current(); return; }
       ctx.current?.resume().catch(() => {});
       if (!wake.current) acquireWake();
       if (!ws.current) {
