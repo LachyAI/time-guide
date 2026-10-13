@@ -20,6 +20,8 @@ export const metadata: Metadata = {
   title: "Lachy OS",
   description: "Voice agent command center",
   manifest: "/manifest.json",
+  appleWebApp: { capable: true, title: "Voice", statusBarStyle: "black-translucent" },
+  icons: { apple: "/icon-180.png" },
 };
 
 export const viewport: Viewport = {

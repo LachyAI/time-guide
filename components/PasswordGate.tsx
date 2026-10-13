@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-const STORAGE_KEY = "lachy-os-auth";
+import { loadTicket, saveTicket } from "@/lib/session";
 
 export function PasswordGate({ children }: { children: React.ReactNode }) {
   const [unlocked, setUnlocked] = useState(false);
@@ -13,10 +12,12 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check if already authenticated this session
-    const stored = sessionStorage.getItem(STORAGE_KEY);
-    if (stored === "true") setUnlocked(true);
+    // A valid stored ticket means unlocked; voice-brain refusing it fires lachy-os-locked.
+    setUnlocked(Boolean(loadTicket()));
     setReady(true);
+    const relock = () => setUnlocked(false);
+    window.addEventListener("lachy-os-locked", relock);
+    return () => window.removeEventListener("lachy-os-locked", relock);
   }, []);
 
   if (!ready) return null;
@@ -33,8 +34,9 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ password: input }),
       });
 
-      if (res.ok) {
-        sessionStorage.setItem(STORAGE_KEY, "true");
+      const data = res.ok ? await res.json() : null;
+      if (data?.ticket) {
+        saveTicket({ ticket: data.ticket, exp: data.exp });
         setUnlocked(true);
       } else {
         setError(true);
